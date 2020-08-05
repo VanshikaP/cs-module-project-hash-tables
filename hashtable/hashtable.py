@@ -30,6 +30,7 @@ class HashTable:
         # Your code here
         self.capacity = capacity
         self.hash_table = [None] * capacity
+        self.entries = 0
 
 
     def get_num_slots(self):
@@ -53,6 +54,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return (self.entries / self.capacity)
 
 
     def fnv1(self, key, seed=0):
@@ -103,16 +105,22 @@ class HashTable:
         Implement this.
         """
         # Your code here
+
+        self.entries += 1
+        load = self.get_load_factor()
+        if load > 0.7:
+            self.resize(2 * self.capacity)
+
         i = self.hash_index(key)
         if self.hash_table[i] is not None:
             newEntry = HashTableEntry(key,value)
             newEntry.next = self.hash_table[i]
             self.hash_table[i] = newEntry
+            # print('value over written for', key, 'new value:', self.hash_table[i].value, newEntry.value)
         else:
             self.hash_table[i] = HashTableEntry(key,value)
-            
 
-
+        
 
 
     def delete(self, key):
@@ -124,11 +132,13 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        
         i = self.hash_index(key)
         node = self.hash_table[i]
         prev = HashTableEntry(None, None)
 
         if node.next is None and node.key == key:
+            self.entries -= 1
             self.hash_table[i] = None
             return
 
@@ -138,6 +148,7 @@ class HashTable:
                     prev.next = node.next
                 # else:
                 #     prev.next = None
+                self.entries -= 1
                 return
             else:
                 prev = node
@@ -175,6 +186,23 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        resized = HashTable(new_capacity)
+
+        for entry in self.hash_table:
+            if entry is not None:
+                node = entry
+                entries = []
+                while node:
+                    entries.append(node)
+                    node = node.next
+                i = len(entries) - 1
+                while i >= 0:
+                    resized.put(entries[i].key, entries[i].value)
+                    i -= 1
+
+        self.capacity = new_capacity
+        self.hash_table = resized.hash_table
+        
 
 
 
