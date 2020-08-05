@@ -6,6 +6,12 @@ class HashTableEntry:
         self.key = key
         self.value = value
         self.next = None
+    
+    # def insertToHead(self, key, value):
+    #     temp = HashTableEntry(self.key, self.value)
+    #     self.key = key
+    #     self.value = value
+    #     self.next = temp
 
 
 # Hash table can't have fewer than this many slots
@@ -98,7 +104,14 @@ class HashTable:
         """
         # Your code here
         i = self.hash_index(key)
-        self.hash_table[i] = value
+        if self.hash_table[i] is not None:
+            newEntry = HashTableEntry(key,value)
+            newEntry.next = self.hash_table[i]
+            self.hash_table[i] = newEntry
+        else:
+            self.hash_table[i] = HashTableEntry(key,value)
+            
+
 
 
 
@@ -112,7 +125,26 @@ class HashTable:
         """
         # Your code here
         i = self.hash_index(key)
-        self.hash_table[i] = None
+        node = self.hash_table[i]
+        prev = HashTableEntry(None, None)
+
+        if node.next is None and node.key == key:
+            self.hash_table[i] = None
+            return
+
+        while node is not None:
+            if node.key == key:
+                if node.next is not None:
+                    prev.next = node.next
+                # else:
+                #     prev.next = None
+                return
+            else:
+                prev = node
+                node = node.next
+        
+        print('Key not found')
+        return None
 
 
     def get(self, key):
@@ -125,7 +157,14 @@ class HashTable:
         """
         # Your code here
         i = self.hash_index(key)
-        return self.hash_table[i]
+        node = self.hash_table[i]
+
+        while node is not None:
+            if node.key == key:
+                return node.value
+            node = node.next
+        
+        return None
 
 
     def resize(self, new_capacity):
