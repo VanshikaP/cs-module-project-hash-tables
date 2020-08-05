@@ -134,28 +134,36 @@ class HashTable:
         # Your code here
         
         i = self.hash_index(key)
+        found = False
         node = self.hash_table[i]
         prev = HashTableEntry(None, None)
 
         if node.next is None and node.key == key:
-            self.entries -= 1
             self.hash_table[i] = None
-            return
+            found = True
 
-        while node is not None:
+        while not found and node is not None:
             if node.key == key:
                 if node.next is not None:
                     prev.next = node.next
-                # else:
-                #     prev.next = None
-                self.entries -= 1
-                return
+                    node = node.next
+                found = True
             else:
                 prev = node
                 node = node.next
         
-        print('Key not found')
-        return None
+        if found:
+            self.entries -= 1
+            if self.get_load_factor() < 0.2:
+                new_capacity = 0.5 * self.capacity
+                if new_capacity > 8:
+                    self.resize(new_capacity)
+                else:
+                    self.resize(8)
+            return
+        else:
+            print('Key not found')
+            return None
 
 
     def get(self, key):
@@ -193,11 +201,11 @@ class HashTable:
                 node = entry
                 entries = []
                 while node:
-                    entries.append(node)
+                    entries.append([node.key, node.value])
                     node = node.next
                 i = len(entries) - 1
                 while i >= 0:
-                    resized.put(entries[i].key, entries[i].value)
+                    resized.put(entries[i][0], entries[i][1])
                     i -= 1
 
         self.capacity = new_capacity
